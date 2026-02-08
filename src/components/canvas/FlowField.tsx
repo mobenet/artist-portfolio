@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { useDeviceCapability } from "@/hooks/useDeviceCapability";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { curl2 } from "@/lib/noise";
+import { handStateRef } from "@/context/HandTrackingContext";
 
 interface Particle {
   x: number;
@@ -175,6 +176,20 @@ export function FlowField() {
           const attract = force * force * 2;
           vx += (dx / dist) * attract;
           vy += (dy / dist) * attract;
+        }
+
+        // Open palm scatter — repel particles outward ("force push")
+        const hs = handStateRef.current;
+        if (hs?.isOpenPalm && hs.detected) {
+          const hdx = p.x - hs.screenX;
+          const hdy = p.y - hs.screenY;
+          const hdist = Math.sqrt(hdx * hdx + hdy * hdy);
+          if (hdist < 400 && hdist > 0) {
+            const repel = ((400 - hdist) / 400);
+            const pushForce = repel * repel * 6;
+            vx += (hdx / hdist) * pushForce;
+            vy += (hdy / hdist) * pushForce;
+          }
         }
 
         p.x += vx;

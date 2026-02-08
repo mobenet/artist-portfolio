@@ -10,6 +10,12 @@ import {
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { ScrollProgress } from "@/components/layout/ScrollProgress";
+import { HandTrackingProvider } from "@/context/HandTrackingContext";
+import { HandTrackingToggle } from "@/components/hand-tracking/HandTrackingToggle";
+import { CameraPreview } from "@/components/hand-tracking/CameraPreview";
+import { VirtualCursor } from "@/components/hand-tracking/VirtualCursor";
+import { HandGestureScrollListener } from "@/components/hand-tracking/HandGestureScrollListener";
+import { HandTrackingGuide } from "@/components/hand-tracking/HandTrackingGuide";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -65,9 +71,16 @@ export default function RootLayout({
       className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable} ${bebasNeue.variable} ${sora.variable}`}
     >
       <body className="min-h-screen bg-background text-foreground">
-        <ScrollProgress />
-        <Navbar />
-        <main className="relative z-10">{children}</main>
+        <HandTrackingProvider>
+          <ScrollProgress />
+          <Navbar />
+          <main className="relative z-10">{children}</main>
+          <HandTrackingToggle />
+          <CameraPreview />
+          <HandTrackingGuide />
+          <VirtualCursor />
+          <HandGestureScrollListener />
+        </HandTrackingProvider>
       </body>
     </html>
   );
