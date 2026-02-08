@@ -43,14 +43,22 @@ export function ProjectItem({ project, index }: ProjectItemProps) {
       >
         {/* Image — full bleed, tall */}
         <div className="relative w-full overflow-hidden" style={{ height: "clamp(400px, 60vh, 700px)" }}>
-          <motion.img
-            src={project.image}
-            alt={project.title}
-            className="w-full h-full object-cover will-change-transform"
-            style={{ y: imgY, scale: 1.05 }}
-            whileHover={{ scale: 1.08 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-          />
+          {project.image ? (
+            <motion.img
+              src={project.image}
+              alt={project.title}
+              className="w-full h-full object-cover will-change-transform"
+              style={{ y: imgY, scale: 1.05 }}
+              whileHover={{ scale: 1.08 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            />
+          ) : (
+            <div className="w-full h-full bg-surface flex items-center justify-center">
+              <span className="text-foreground/5 font-display font-bold select-none" style={{ fontSize: "clamp(3rem, 10vw, 10rem)" }}>
+                {project.title}
+              </span>
+            </div>
+          )}
 
           {/* Dark gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent pointer-events-none" />
@@ -100,7 +108,7 @@ export function ProjectItem({ project, index }: ProjectItemProps) {
                     transition={{ delay: 0.4, duration: 0.6 }}
                   />
                   <span className="text-[10px] font-mono text-accent uppercase tracking-[0.3em] translate-x-[-20px] opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
-                    View Project
+                    {project.href === "#" ? "Coming Soon" : "View Project"}
                   </span>
                 </div>
               </div>

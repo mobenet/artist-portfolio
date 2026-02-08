@@ -22,4 +22,15 @@ export const projects: Project[] = [
       "https://lh3.googleusercontent.com/aida-public/AB6AXuD8ksrcBwnVaUUF4DzTGG3Ij9fSiRjcfyGHnju_tMBnuq4vCiTjW9LeD1rY3HtWIBCb0UKAG3DtmndDkhRxcKU2DKMTaCATyw235eTle0CczUOhWFKadJ-H8GHgeiA90g7kVPhH5J9IWUSNFov-FV9hlQwej4SUravEY0nizEDm1QP8aOL7RYMtwV3SNkjJz-_X7kbEISp_IheRwdJqCDclrxdl8j5UUDTcfzpLt9lyQIv3cK7MYn534pWhKVO2QQr1AVI_5HAdYF8",
     href: "/projects/the-synthetic-ghost",
   },
+  {
+    slug: "quantic-gender",
+    title: "Quantic Gender",
+    subtitle: "Immersive Installation — AI & Queer Identity",
+    year: "2025",
+    tags: ["Installation", "Generative AI", "Queer Theory"],
+    description:
+      "Immersive installation fusing quantum physics, machine learning and queer experience. A generative AI trained on a collective queer archive produces abstract, dreamlike visuals projected into the space — not to classify identity, but to contemplate its multiplicity. The machine doesn't identify, it imagines.",
+    image: "",
+    href: "#",
+  },
 ];

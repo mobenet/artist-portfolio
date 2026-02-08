@@ -26,7 +26,7 @@ function createParticle(w: number, h: number, forceRed = false): Particle {
     y,
     prevX: x,
     prevY: y,
-    speed: 0.3 + Math.random() * 0.7,
+    speed: 0.15 + Math.random() * 0.35,
     life: Math.random() * maxLife,
     maxLife,
     isRed: forceRed || Math.random() < 0.12,
@@ -120,7 +120,7 @@ export function FlowField() {
       const timeSpeed = 0.0003 + scrollEnergy * 0.002;
 
       // Speed multiplier: particles accelerate when scrolling
-      const speedMult = 1 + scrollEnergy * 2.5;
+      const speedMult = 1 + scrollEnergy * 1.2;
 
       // Red intensity increases toward bottom of page
       const redBoost = progress * 0.4;

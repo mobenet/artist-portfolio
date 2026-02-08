@@ -6,7 +6,7 @@ import { ProjectItem } from "@/components/ProjectItem";
 
 export function ProjectsSection() {
   return (
-    <section id="projects" className="relative py-32">
+    <section id="work" className="relative py-32">
       {/* Section header */}
       <motion.div
         initial={{ opacity: 0, x: -30 }}
@@ -20,7 +20,7 @@ export function ProjectsSection() {
             Selected Work
           </p>
           <h2 className="text-display-lg font-display font-bold text-foreground tracking-tight">
-            Projects
+            Work
           </h2>
         </div>
         <motion.div
