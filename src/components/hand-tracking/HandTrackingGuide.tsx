@@ -52,16 +52,25 @@ export function HandTrackingGuide() {
   const { enabled, tracking } = useHandTracking();
   const [visible, setVisible] = useState(false);
 
-  // Show guide when tracking starts, auto-dismiss after 6s
+  // Show guide when tracking starts; stays until dismissed so first-time
+  // users have time to read all four gestures. Shown once per session.
   useEffect(() => {
-    if (enabled && tracking) {
-      setVisible(true);
-      const timer = setTimeout(() => setVisible(false), 6000);
-      return () => clearTimeout(timer);
-    } else {
-      setVisible(false);
-    }
+    const timer = window.setTimeout(() => {
+      if (enabled && tracking) {
+        if (!sessionStorage.getItem("mo-gestures-seen")) {
+          setVisible(true);
+        }
+      } else {
+        setVisible(false);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [enabled, tracking]);
+
+  const dismiss = () => {
+    sessionStorage.setItem("mo-gestures-seen", "1");
+    setVisible(false);
+  };
 
   return (
     <AnimatePresence>
@@ -78,7 +87,7 @@ export function HandTrackingGuide() {
               Gestures
             </span>
             <button
-              onClick={() => setVisible(false)}
+              onClick={dismiss}
               className="text-muted hover:text-foreground transition-colors text-xs font-mono"
               aria-label="Dismiss guide"
             >

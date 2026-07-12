@@ -57,6 +57,8 @@ export function FlowField() {
 
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
     let animId = 0;
     let time = 0;
@@ -65,6 +67,7 @@ export function FlowField() {
     let particles: Particle[] = [];
     let lastScrollY = 0;
     let smoothVelocity = 0;
+    let resizeTimer = 0;
 
     const init = () => {
       const count = getParticleCount();
@@ -74,21 +77,39 @@ export function FlowField() {
       }
     };
 
-    const resize = () => {
+    const applySize = () => {
       const dpr = Math.min(window.devicePixelRatio, 2);
+      const prevW = w;
+      const prevH = h;
       w = window.innerWidth;
       h = window.innerHeight;
-      canvas.width = w * dpr;
+      canvas.width = w * dpr; // resets the context transform
       canvas.height = h * dpr;
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.scale(dpr, dpr);
-        ctx.fillStyle = "#0a0a0a";
-        ctx.fillRect(0, 0, w, h);
+      ctx.scale(dpr, dpr);
+      ctx.fillStyle = "#0a0a0a";
+      ctx.fillRect(0, 0, w, h);
+
+      if (particles.length === 0) {
+        init();
+      } else if (prevW > 0 && prevH > 0) {
+        // Keep existing particles on resize (mobile URL bar triggers resize
+        // on scroll) — just rescale their positions to the new viewport.
+        const sx = w / prevW;
+        const sy = h / prevH;
+        for (const p of particles) {
+          p.x *= sx;
+          p.prevX = p.x;
+          p.y *= sy;
+          p.prevY = p.y;
+        }
       }
-      init();
+    };
+
+    const resize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(applySize, 150);
     };
 
     const handleScroll = () => {
@@ -100,9 +121,6 @@ export function FlowField() {
     };
 
     const animate = () => {
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-
       const mouse = mouseRef.current;
       const { progress, velocity } = scrollRef.current;
 
@@ -236,7 +254,7 @@ export function FlowField() {
       mouseRef.current = { x: -1000, y: -1000 };
     };
 
-    resize();
+    applySize();
     window.addEventListener("resize", resize);
     window.addEventListener("mousemove", handleMouse);
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -249,6 +267,7 @@ export function FlowField() {
       window.removeEventListener("mousemove", handleMouse);
       window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("mouseleave", handleMouseLeave);
+      clearTimeout(resizeTimer);
       cancelAnimationFrame(animId);
     };
   }, [getParticleCount, prefersReducedMotion]);

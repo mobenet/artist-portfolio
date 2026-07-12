@@ -5,6 +5,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useMemo,
   useRef,
   useEffect,
 } from "react";
@@ -15,7 +16,6 @@ interface HandTrackingContextValue {
   loading: boolean;
   tracking: boolean;
   toggle: () => void;
-  handState: HandState | null;
   videoElement: HTMLVideoElement | null;
 }
 
@@ -24,11 +24,14 @@ const HandTrackingContext = createContext<HandTrackingContextValue>({
   loading: false,
   tracking: false,
   toggle: () => {},
-  handState: null,
   videoElement: null,
 });
 
-/** Module-level ref for FlowField's animation loop to read without re-renders */
+/**
+ * Per-frame hand state lives here, NOT in React state: the detection loop
+ * runs at camera framerate and pushing it through context would re-render
+ * every consumer ~60 times per second. Consumers read it in their own rAF.
+ */
 export const handStateRef: { current: HandState | null } = { current: null };
 
 export function HandTrackingProvider({
@@ -39,7 +42,6 @@ export function HandTrackingProvider({
   const [enabled, setEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [tracking, setTracking] = useState(false);
-  const [handState, setHandState] = useState<HandState | null>(null);
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(
     null
   );
@@ -120,7 +122,6 @@ export function HandTrackingProvider({
   const handleHandState = useCallback(
     (state: HandState) => {
       handStateRef.current = state;
-      setHandState(state);
       dispatchSyntheticEvents(state);
     },
     [dispatchSyntheticEvents]
@@ -133,7 +134,6 @@ export function HandTrackingProvider({
       stopHandTracking();
       setEnabled(false);
       setTracking(false);
-      setHandState(null);
       setVideoElement(null);
       handStateRef.current = null;
       lastHoveredRef.current = null;
@@ -169,10 +169,13 @@ export function HandTrackingProvider({
     };
   }, [enabled]);
 
+  const value = useMemo(
+    () => ({ enabled, loading, tracking, toggle, videoElement }),
+    [enabled, loading, tracking, toggle, videoElement]
+  );
+
   return (
-    <HandTrackingContext.Provider
-      value={{ enabled, loading, tracking, toggle, handState, videoElement }}
-    >
+    <HandTrackingContext.Provider value={value}>
       {children}
     </HandTrackingContext.Provider>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 const FALLBACKS = [
   "i taught the circuit to hesitate\nbefore it learned my name",
@@ -19,22 +19,33 @@ function randomFallback(): string {
   return FALLBACKS[Math.floor(Math.random() * FALLBACKS.length)];
 }
 
-export function usePoeticFragment(): { text: string; isGenerated: boolean; ready: boolean } {
+export function usePoeticFragment(): {
+  text: string;
+  isGenerated: boolean;
+  ready: boolean;
+  regenerating: boolean;
+  regenerate: () => void;
+} {
   const [text, setText] = useState("");
   const [isGenerated, setIsGenerated] = useState(false);
   const [ready, setReady] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
   const fetchedRef = useRef(false);
 
-  // Hydration-safe: set initial text only on the client
+  // Hydration-safe: set initial text only on the client (deferred so the
+  // random fallback never runs during render or synchronously in the effect)
   useEffect(() => {
-    const cached = sessionStorage.getItem(STORAGE_KEY);
-    if (cached) {
-      setText(cached);
-      setIsGenerated(true);
-    } else {
-      setText(randomFallback());
-    }
-    setReady(true);
+    const timer = window.setTimeout(() => {
+      const cached = sessionStorage.getItem(STORAGE_KEY);
+      if (cached) {
+        setText(cached);
+        setIsGenerated(true);
+      } else {
+        setText(randomFallback());
+      }
+      setReady(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   // Fetch from API
@@ -70,5 +81,29 @@ export function usePoeticFragment(): { text: string; isGenerated: boolean; ready
     }
   }, []);
 
-  return { text, isGenerated, ready };
+  // On-demand regeneration — unique query param busts the CDN cache
+  const regenerate = useCallback(() => {
+    setRegenerating(true);
+    fetch(`/api/poem?r=${Date.now()}`, { cache: "no-store" })
+      .then((res) => {
+        if (!res.ok) throw new Error(`${res.status}`);
+        return res.json();
+      })
+      .then((data: { text: string }) => {
+        if (data.text) {
+          setText(data.text);
+          setIsGenerated(true);
+          sessionStorage.setItem(STORAGE_KEY, data.text);
+        }
+      })
+      .catch(() => {
+        // Offer a different fallback so the button still feels alive
+        setText(randomFallback());
+        setIsGenerated(false);
+        sessionStorage.removeItem(STORAGE_KEY);
+      })
+      .finally(() => setRegenerating(false));
+  }, []);
+
+  return { text, isGenerated, ready, regenerating, regenerate };
 }

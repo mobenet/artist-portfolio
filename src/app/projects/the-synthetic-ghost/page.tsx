@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { FlowField } from "@/components/canvas/FlowField";
 
@@ -27,13 +28,17 @@ export default function SyntheticGhostPage() {
         {/* HERO */}
         <section className="mt-8">
           <div className="relative overflow-hidden bg-surface min-h-[70vh] flex flex-col justify-end group border border-border">
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
-              style={{
-                backgroundImage:
-                  "linear-gradient(to top, rgba(10, 10, 10, 1) 0%, rgba(10, 10, 10, 0.4) 50%, rgba(10, 10, 10, 0) 100%), url('https://lh3.googleusercontent.com/aida-public/AB6AXuD8ksrcBwnVaUUF4DzTGG3Ij9fSiRjcfyGHnju_tMBnuq4vCiTjW9LeD1rY3HtWIBCb0UKAG3DtmndDkhRxcKU2DKMTaCATyw235eTle0CczUOhWFKadJ-H8GHgeiA90g7kVPhH5J9IWUSNFov-FV9hlQwej4SUravEY0nizEDm1QP8aOL7RYMtwV3SNkjJz-_X7kbEISp_IheRwdJqCDclrxdl8j5UUDTcfzpLt9lyQIv3cK7MYn534pWhKVO2QQr1AVI_5HAdYF8')",
-              }}
-            />
+            <div className="absolute inset-0 overflow-hidden">
+              <Image
+                src="/projects/synthetic-ghost/hero.png"
+                alt="The Synthetic Ghost — performance still"
+                fill
+                priority
+                sizes="(max-width: 1200px) 100vw, 1200px"
+                className="object-cover transition-transform duration-1000 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+            </div>
 
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -228,37 +233,39 @@ def process_frame(video_input):
                 h: "h-96",
                 alt: "Main performance shot",
                 caption: "Stage 01: Initial Calibration Phase",
-                src: "https://lh3.googleusercontent.com/aida-public/AB6AXuCE3cdDtC9Zb0kaZUUP8GmB5zY6pjYY6VXP28ZSE_mYhtqRLbie44-b7gGP8ZF3BSnSDc7RM5L1O0eC49d9x2FGAMPbfS2JLIhR4PWPN_FABBT_Rri4nG4mSYZHZjT3eRp0rMEcfCqV26pW4dhRciLeQARu_HokXAObSQ6GPCws4qcFV9muOo9E8aK07uZfAc4lYIPnd1_hKAREktUfUPFMFq81UFlDv5V_DaadGm2kxvmL_aKYrwBjX6tLarfAMDTwoss4uMk_gQU",
+                src: "/projects/synthetic-ghost/calibration.png",
               },
               {
                 span: "md:col-span-4",
                 h: "h-96",
                 alt: "Hardware interface",
                 caption: "The Inference Rig",
-                src: "https://lh3.googleusercontent.com/aida-public/AB6AXuBxeF3Zwmcxo39miENDuAsBlnMsegl5HSo3vdOYxRo2X0h4gxT-qj4gXuMtTEvV9MUQ392KbrQK8604SqBAcWP5ujxIqcqMGUOihgW-cSDR8wZuWwSQ8zxJPyWn0TXL94BDFyagWnpR5bgozlVWG0EYGpfD7fdnXHj3AObFcyiRh4c1IfSM_4AYlr5jrn6VD95DDqWBGXkfJ6ZHzjBYYDA3Bru5KRPc1GqVR5wPsT8YOWqnFsAXLipUBVVe7cRwUjSpotlJ8Jw1Wwo",
+                src: "/projects/synthetic-ghost/rig.png",
               },
               {
                 span: "md:col-span-4",
                 h: "h-64",
                 alt: "Code visualization",
                 caption: "Latent Vector Visualization",
-                src: "https://lh3.googleusercontent.com/aida-public/AB6AXuDg3BafnFptRO8HBAoYTuVpXVq6Z0jKWqIzjq1sKwFk2TCpUm-3OuVgwqf0Q2u1xLAglXymGnlX4osePIAHQDin8I0AKIPOqSVBgUX-Ey2TdUC5ICfFPkszmruDoN83ezxx6LWnG8SLty6PtW7bZRsa66GzPfDnvbaM4zOqwRVXa4SEabnWFAsXm7MwVtYV1qvAvrAUfIMnVnGt_WFIHw24VHvBbEU32Jp7S-9a-_AvVa09t3HUzd7ihVbHF7VWHZc2J5FnW-vrByc",
+                src: "/projects/synthetic-ghost/latent.png",
               },
               {
                 span: "md:col-span-8",
                 h: "h-64",
                 alt: "Lab environment",
                 caption: "Final Exhibition Setup",
-                src: "https://lh3.googleusercontent.com/aida-public/AB6AXuBl0-G3zozv452UA08dAAlvHfnOgsRjWqauUsKDyHP7jcsdSSmTpLTbUFRFEODhlvut_pMxb6Abq9TsmICNjnLjrc_CLhENj7CAslOxT_xzpUfp0XLEbGBcVdgpG4vuPSUi9RkseXu5tcy41lwn-o3KHGPoipKif6RYgv7qk0zeq0P4DU-ATDInRbEnfl4hl6uuBf5__IC8fWZXB9XWBUe1iDE2ocA2GoIxhNMNxNyK4VuCF5cU4UChf5YtUl4lXKEnhNS24iE4S-c",
+                src: "/projects/synthetic-ghost/exhibition.png",
               },
             ].map((img) => (
               <div
                 key={img.alt}
                 className={`${img.span} group relative overflow-hidden ${img.h} bg-surface border border-border`}
               >
-                <img
+                <Image
                   alt={img.alt}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 66vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100"
                   src={img.src}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-8">
@@ -271,16 +278,19 @@ def process_frame(video_input):
           </div>
         </section>
 
-        {/* CALL TO ACTION */}
+        {/* NEXT PROJECT */}
         <section className="mt-32 pt-20 border-t border-border flex flex-col items-center text-center">
           <p className="text-caption text-accent font-mono uppercase tracking-[0.4em] mb-6">
-            View More Work
+            Next Project
           </p>
-          <h3 className="text-5xl md:text-7xl font-display font-bold mb-12 tracking-tighter text-foreground">
-            Explore More
+          <h3 className="text-5xl md:text-7xl font-display font-bold mb-4 tracking-tighter text-foreground/40">
+            Quantic Gender
           </h3>
+          <p className="text-muted font-mono text-xs uppercase tracking-[0.3em] mb-12">
+            2025 — Coming Soon
+          </p>
           <Link
-            href="/#projects"
+            href="/#work"
             className="px-10 py-5 border border-border text-foreground hover:border-accent hover:text-accent transition-all inline-flex items-center gap-2 font-mono uppercase tracking-widest text-xs"
           >
             &larr; Return to Portfolio

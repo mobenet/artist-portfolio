@@ -1,26 +1,55 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useHandTracking } from "@/context/HandTrackingContext";
+import { useEffect, useState } from "react";
+import { motion, useMotionValue } from "framer-motion";
+import { useHandTracking, handStateRef } from "@/context/HandTrackingContext";
+
+type Gesture = "idle" | "pinch" | "palm";
+
+const RING_SIZE: Record<Gesture, number> = {
+  pinch: 20,
+  palm: 48,
+  idle: 32,
+};
 
 export function VirtualCursor() {
-  const { enabled, tracking, handState } = useHandTracking();
+  const { enabled, tracking } = useHandTracking();
+  const [gesture, setGesture] = useState<Gesture>("idle");
+  const [detected, setDetected] = useState(false);
 
-  if (!enabled || !tracking || !handState?.detected) return null;
+  const x = useMotionValue(-100);
+  const y = useMotionValue(-100);
 
-  const { screenX, screenY, isPinching, isOpenPalm } = handState;
+  // Read per-frame hand state from the shared ref in our own rAF loop —
+  // avoids re-rendering the React tree at camera framerate.
+  useEffect(() => {
+    if (!enabled || !tracking) return;
 
-  // Ring size changes with gesture
-  const ringSize = isPinching ? 20 : isOpenPalm ? 48 : 32;
+    let rafId = 0;
+    const update = () => {
+      const hs = handStateRef.current;
+      if (hs?.detected) {
+        x.set(hs.screenX);
+        y.set(hs.screenY);
+        setDetected(true);
+        setGesture(hs.isPinching ? "pinch" : hs.isOpenPalm ? "palm" : "idle");
+      } else {
+        setDetected(false);
+      }
+      rafId = requestAnimationFrame(update);
+    };
+    rafId = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(rafId);
+  }, [enabled, tracking, x, y]);
+
+  if (!enabled || !tracking || !detected) return null;
+
+  const ringSize = RING_SIZE[gesture];
 
   return (
     <motion.div
       className="fixed top-0 left-0 z-[60] pointer-events-none"
-      animate={{
-        x: screenX - ringSize / 2,
-        y: screenY - ringSize / 2,
-      }}
-      transition={{ type: "spring", stiffness: 300, damping: 25, mass: 0.5 }}
+      style={{ x, y, translateX: "-50%", translateY: "-50%" }}
     >
       {/* Outer ring */}
       <motion.div
@@ -28,7 +57,7 @@ export function VirtualCursor() {
         animate={{
           width: ringSize,
           height: ringSize,
-          opacity: isPinching ? 1 : 0.7,
+          opacity: gesture === "pinch" ? 1 : 0.7,
         }}
         transition={{ type: "spring", stiffness: 400, damping: 20 }}
       >
@@ -36,8 +65,8 @@ export function VirtualCursor() {
         <motion.div
           className="rounded-full bg-accent"
           animate={{
-            width: isPinching ? 6 : 4,
-            height: isPinching ? 6 : 4,
+            width: gesture === "pinch" ? 6 : 4,
+            height: gesture === "pinch" ? 6 : 4,
           }}
         />
       </motion.div>

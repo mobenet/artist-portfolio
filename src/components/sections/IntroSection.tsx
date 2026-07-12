@@ -3,18 +3,26 @@
 import { motion } from "framer-motion";
 import { useRef, useCallback, useEffect, useState } from "react";
 import { CyclingText } from "@/components/motion/CyclingText";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 const NAMES = ["Mo", "MAGNETT__"];
 const GLITCH_CHARS = "*^~#@$%&!?><{}[]|/\\";
 const NAME_FONT = "var(--font-bebas)";
 
 // Text scramble hook — cycles between names, scrambling through random chars
-function useTextScramble(words: string[], interval = 3000, scrambleDuration = 600) {
+function useTextScramble(
+  words: string[],
+  interval = 3000,
+  scrambleDuration = 600,
+  disabled = false
+) {
   const [display, setDisplay] = useState(words[0]);
   const indexRef = useRef(0);
   const frameRef = useRef<number>(0);
 
   useEffect(() => {
+    if (disabled) return;
+
     const cycle = () => {
       const from = words[indexRef.current];
       indexRef.current = (indexRef.current + 1) % words.length;
@@ -58,7 +66,7 @@ function useTextScramble(words: string[], interval = 3000, scrambleDuration = 60
       clearInterval(timer);
       if (frameRef.current) clearTimeout(frameRef.current);
     };
-  }, [words, interval, scrambleDuration]);
+  }, [words, interval, scrambleDuration, disabled]);
 
   return display;
 }
@@ -114,7 +122,8 @@ function useGlitch() {
 }
 
 export function IntroSection() {
-  const displayName = useTextScramble(NAMES, 3000, 600);
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const displayName = useTextScramble(NAMES, 3000, 600, prefersReducedMotion);
   const { glitch, onMouseMove } = useGlitch();
 
   const nameStyle = {
@@ -135,7 +144,7 @@ export function IntroSection() {
         className="absolute top-8 left-6 md:left-12 lg:left-24"
       >
         <span className="text-[10px] font-mono text-muted tracking-[0.4em] uppercase">
-          Portfolio / 2024
+          Portfolio / {new Date().getFullYear()}
         </span>
       </motion.div>
 
@@ -157,12 +166,13 @@ export function IntroSection() {
           onMouseMove={onMouseMove}
           className="relative cursor-default select-none"
         >
-          {/* Base name */}
+          {/* Base name — stable label for screen readers, scramble is decorative */}
           <h1
+            aria-label="Mo Magnett"
             className="text-foreground font-bold leading-[0.85] tracking-[-0.04em] whitespace-nowrap"
             style={nameStyle}
           >
-            {displayName}
+            <span aria-hidden>{displayName}</span>
           </h1>
 
           {/* Glitch layer 1 — red channel offset */}

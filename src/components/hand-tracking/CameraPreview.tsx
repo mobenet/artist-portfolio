@@ -2,13 +2,13 @@
 
 import { useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useHandTracking } from "@/context/HandTrackingContext";
+import { useHandTracking, handStateRef } from "@/context/HandTrackingContext";
 
 const PREVIEW_W = 160;
 const PREVIEW_H = 120;
 
 export function CameraPreview() {
-  const { enabled, tracking, handState, videoElement } = useHandTracking();
+  const { enabled, tracking, videoElement } = useHandTracking();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef(0);
 
@@ -34,8 +34,8 @@ export function CameraPreview() {
       ctx.drawImage(videoElement, 0, 0, PREVIEW_W, PREVIEW_H);
       ctx.restore();
 
-      // Draw landmarks
-      const lm = handState?.landmarks;
+      // Draw landmarks — read from the shared ref to avoid per-frame re-renders
+      const lm = handStateRef.current?.landmarks;
       if (lm) {
         ctx.fillStyle = "#e63946";
         for (const point of lm) {
@@ -53,7 +53,7 @@ export function CameraPreview() {
     rafRef.current = requestAnimationFrame(draw);
 
     return () => cancelAnimationFrame(rafRef.current);
-  }, [enabled, tracking, videoElement, handState]);
+  }, [enabled, tracking, videoElement]);
 
   return (
     <AnimatePresence>

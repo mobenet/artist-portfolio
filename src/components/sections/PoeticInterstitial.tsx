@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePoeticFragment } from "@/hooks/usePoeticFragment";
 
 export function PoeticInterstitial() {
-  const { text, isGenerated, ready } = usePoeticFragment();
+  const { text, isGenerated, ready, regenerating, regenerate } =
+    usePoeticFragment();
 
   return (
     <section className="relative flex items-center justify-center px-6 md:px-12 lg:px-24 py-24 md:py-32 min-h-[40vh]">
@@ -31,9 +32,9 @@ export function PoeticInterstitial() {
           <AnimatePresence mode="wait">
             {ready && (
               <motion.p
-                key={isGenerated ? "gen" : "fallback"}
+                key={text}
                 initial={{ opacity: 0, filter: "blur(8px)" }}
-                animate={{ opacity: 1, filter: "blur(0px)" }}
+                animate={{ opacity: regenerating ? 0.3 : 1, filter: "blur(0px)" }}
                 exit={{ opacity: 0, filter: "blur(8px)" }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
                 className="text-foreground/50 text-lg md:text-xl leading-relaxed italic whitespace-pre-line"
@@ -43,6 +44,21 @@ export function PoeticInterstitial() {
               </motion.p>
             )}
           </AnimatePresence>
+        </div>
+
+        {/* Provenance + regenerate — the machine authorship IS the piece */}
+        <div className="mt-8 flex items-center justify-center gap-5">
+          <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-muted/70">
+            {isGenerated ? "[ machine-generated ]" : "[ from the archive ]"}
+          </span>
+          <button
+            onClick={regenerate}
+            disabled={regenerating}
+            className="font-mono text-[10px] tracking-[0.25em] uppercase text-accent/60 hover:text-accent disabled:opacity-40 transition-colors"
+            aria-label="Generate a new fragment"
+          >
+            {regenerating ? "// listening…" : "// regenerate"}
+          </button>
         </div>
       </motion.div>
 

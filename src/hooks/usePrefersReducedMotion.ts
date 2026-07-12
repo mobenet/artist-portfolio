@@ -1,21 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 export function usePrefersReducedMotion(): boolean {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(true);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setPrefersReducedMotion(mediaQuery.matches);
-
-    const handler = (event: MediaQueryListEvent) => {
-      setPrefersReducedMotion(event.matches);
-    };
-
-    mediaQuery.addEventListener("change", handler);
-    return () => mediaQuery.removeEventListener("change", handler);
-  }, []);
-
-  return prefersReducedMotion;
+  // Assume reduced motion on the server; corrected right after hydration
+  return useMediaQuery("(prefers-reduced-motion: reduce)", true);
 }

@@ -1,52 +1,62 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useHandTracking } from "@/context/HandTrackingContext";
+import { useHandTracking, handStateRef } from "@/context/HandTrackingContext";
+import { scrollToElement } from "@/lib/scroll";
 
 const SECTION_IDS = ["intro", "work", "code", "about", "contact"];
 const SWIPE_THRESHOLD = 0.012; // normalized wrist velocity
 const COOLDOWN_MS = 1000;
+const POLL_MS = 100;
 
 export function useHandGestureScroll() {
-  const { enabled, handState } = useHandTracking();
+  const { enabled, tracking } = useHandTracking();
   const lastScrollTime = useRef(0);
 
   useEffect(() => {
-    if (!enabled || !handState?.detected) return;
+    if (!enabled || !tracking) return;
 
-    const { wristVelocityY } = handState;
-    const now = Date.now();
+    // Poll the shared ref instead of subscribing to per-frame React state
+    const timer = setInterval(() => {
+      const hs = handStateRef.current;
+      if (!hs?.detected) return;
 
-    if (
-      Math.abs(wristVelocityY) < SWIPE_THRESHOLD ||
-      now - lastScrollTime.current < COOLDOWN_MS
-    ) {
-      return;
-    }
+      const { wristVelocityY } = hs;
+      const now = Date.now();
 
-    // Find current section
-    const scrollY = window.scrollY + window.innerHeight / 2;
-    let currentIndex = 0;
-    for (let i = SECTION_IDS.length - 1; i >= 0; i--) {
-      const el = document.getElementById(SECTION_IDS[i]);
-      if (el && scrollY >= el.offsetTop) {
-        currentIndex = i;
-        break;
+      if (
+        Math.abs(wristVelocityY) < SWIPE_THRESHOLD ||
+        now - lastScrollTime.current < COOLDOWN_MS
+      ) {
+        return;
       }
-    }
 
-    // Swipe down (positive velocity) → next section, up → previous
-    const nextIndex =
-      wristVelocityY > 0
-        ? Math.min(currentIndex + 1, SECTION_IDS.length - 1)
-        : Math.max(currentIndex - 1, 0);
-
-    if (nextIndex !== currentIndex) {
-      const target = document.getElementById(SECTION_IDS[nextIndex]);
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth" });
-        lastScrollTime.current = now;
+      // Find current section
+      const scrollY = window.scrollY + window.innerHeight / 2;
+      let currentIndex = 0;
+      for (let i = SECTION_IDS.length - 1; i >= 0; i--) {
+        const el = document.getElementById(SECTION_IDS[i]);
+        if (el && scrollY >= el.offsetTop) {
+          currentIndex = i;
+          break;
+        }
       }
-    }
-  }, [enabled, handState]);
+
+      // Swipe down (positive velocity) → next section, up → previous
+      const nextIndex =
+        wristVelocityY > 0
+          ? Math.min(currentIndex + 1, SECTION_IDS.length - 1)
+          : Math.max(currentIndex - 1, 0);
+
+      if (nextIndex !== currentIndex) {
+        const target = document.getElementById(SECTION_IDS[nextIndex]);
+        if (target) {
+          scrollToElement(target);
+          lastScrollTime.current = now;
+        }
+      }
+    }, POLL_MS);
+
+    return () => clearInterval(timer);
+  }, [enabled, tracking]);
 }

@@ -19,6 +19,7 @@ export async function GET() {
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
+      signal: AbortSignal.timeout(10_000),
       headers: {
         "Content-Type": "application/json",
         "x-api-key": apiKey,
@@ -61,7 +62,10 @@ export async function GET() {
       { text },
       {
         headers: {
-          "Cache-Control": "no-store",
+          // Shared CDN cache: protects the Anthropic key from request loops
+          // while every visitor within the window shares one generation.
+          // Client-side regeneration busts it with a unique query param.
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=86400",
         },
       }
     );
